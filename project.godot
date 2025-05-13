@@ -23,3 +23,8 @@ window/stretch/mode="viewport"
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/portals/plugin.cfg")
+
+[layer_names]
+
+3d_physics/layer_1="World"
+3d_physics/layer_16="Teleportation"
