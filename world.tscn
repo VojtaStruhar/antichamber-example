@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=4 uid="uid://by4fsuj02uyb3"]
+[gd_scene load_steps=20 format=4 uid="uid://by4fsuj02uyb3"]
 
 [ext_resource type="Script" uid="uid://7uicahbwx5vb" path="res://scripts/antichamber.gd" id="1_2o6r5"]
 [ext_resource type="Script" uid="uid://bdclx4q3c332j" path="res://scripts/player.gd" id="1_f3sb7"]
@@ -34,9 +34,6 @@ glow_enabled = true
 radius = 0.375
 height = 1.5
 
-[sub_resource type="Compositor" id="Compositor_036b0"]
-compositor_effects = Array[CompositorEffect]([null])
-
 [sub_resource type="ArrayMesh" id="ArrayMesh_70uel"]
 _surfaces = [{
 "aabb": AABB(-1, -1, -1, 2, 2, 1),
@@ -67,13 +64,13 @@ collision_layer = 32769
 floor_max_angle = 0.872665
 script = ExtResource("1_f3sb7")
 camera = NodePath("Camera3D")
+SPEED = 3.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
 shape = SubResource("CapsuleShape3D_f3sb7")
 
 [node name="Camera3D" type="Camera3D" parent="Player"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
-compositor = SubResource("Compositor_036b0")
 
 [node name="Hall-BeforeStairs" parent="." instance=ExtResource("2_fj7yv")]
 
@@ -188,7 +185,8 @@ portal_size = Vector2(2, 2)
 exit_portal = NodePath("../WinPortal")
 portal_render_layer = 524288
 portal_frame_width = 0.0
-viewport_size_mode = 0
+viewport_size_mode = 1
+_viewport_size_max_width_absolute = 1920
 view_direction = 0
 is_teleport = true
 teleport_direction = 2
@@ -225,7 +223,8 @@ portal_size = Vector2(2, 2)
 exit_portal = NodePath("../EntryPortal")
 portal_render_layer = 524288
 portal_frame_width = 0.0
-viewport_size_mode = 0
+viewport_size_mode = 1
+_viewport_size_max_width_absolute = 1920
 view_direction = 0
 is_teleport = true
 teleport_direction = 2
@@ -262,7 +261,8 @@ portal_size = Vector2(2, 2)
 exit_portal = NodePath("../EntryPortal")
 portal_render_layer = 524288
 portal_frame_width = 0.0
-viewport_size_mode = 0
+viewport_size_mode = 1
+_viewport_size_max_width_absolute = 1920
 view_direction = 0
 is_teleport = true
 teleport_direction = 2
@@ -299,7 +299,8 @@ portal_size = Vector2(2, 2)
 exit_portal = NodePath("../EntryPortal")
 portal_render_layer = 524288
 portal_frame_width = 0.0
-viewport_size_mode = 0
+viewport_size_mode = 1
+_viewport_size_max_width_absolute = 1920
 view_direction = 0
 is_teleport = true
 teleport_direction = 2
