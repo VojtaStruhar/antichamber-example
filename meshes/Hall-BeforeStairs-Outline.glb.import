@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bgodlxp1u7dyk"
-path="res://.godot/imported/antichamber-stairs.glb-a7a2c5928b008a0bc9203aac5e95b078.scn"
+uid="uid://mpqe1akw3sgh"
+path="res://.godot/imported/Hall-BeforeStairs-Outline.glb-97ee0d252830f610c38b0d7267f85433.scn"
 
 [deps]
 
-source_file="res://meshes/antichamber-stairs.glb"
-dest_files=["res://.godot/imported/antichamber-stairs.glb-a7a2c5928b008a0bc9203aac5e95b078.scn"]
+source_file="res://meshes/Hall-BeforeStairs-Outline.glb"
+dest_files=["res://.godot/imported/Hall-BeforeStairs-Outline.glb-97ee0d252830f610c38b0d7267f85433.scn"]
 
 [params]
 
@@ -32,6 +32,13 @@ animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
 import_script/path=""
-_subresources={}
+_subresources={
+"materials": {
+"Outline": {
+"use_external/enabled": true,
+"use_external/path": "uid://dwvvvj158iy34"
+}
+}
+}
 gltf/naming_version=1
 gltf/embedded_image_handling=1

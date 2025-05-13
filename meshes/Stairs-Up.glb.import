@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://vrjaq85xxmkb"
-path="res://.godot/imported/antichamber-hall-win.glb-71c36b74693068b77a1e50a54191ca30.scn"
+uid="uid://ba0h58ydfu1hh"
+path="res://.godot/imported/Stairs-Up.glb-cee46aedfbb8e817e9f11ed984ab5f51.scn"
 
 [deps]
 
-source_file="res://meshes/antichamber-hall-win.glb"
-dest_files=["res://.godot/imported/antichamber-hall-win.glb-71c36b74693068b77a1e50a54191ca30.scn"]
+source_file="res://meshes/Stairs-Up.glb"
+dest_files=["res://.godot/imported/Stairs-Up.glb-cee46aedfbb8e817e9f11ed984ab5f51.scn"]
 
 [params]
 
@@ -34,7 +34,7 @@ animation/import_rest_as_RESET=false
 import_script/path=""
 _subresources={
 "nodes": {
-"PATH:Hall_Win": {
+"PATH:Stairs_Up": {
 "generate/physics": true
 }
 }

@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://by53bp0otp7po"
-path="res://.godot/imported/antichamber-hall-afterstairs.glb-a625c22bf6c0cc969ae474e125504fd3.scn"
+uid="uid://dq47csq7g0j6t"
+path="res://.godot/imported/Stairs-Up-Collider.glb-fc505e6548da29805ce01f51c0e7e684.scn"
 
 [deps]
 
-source_file="res://meshes/antichamber-hall-afterstairs.glb"
-dest_files=["res://.godot/imported/antichamber-hall-afterstairs.glb-a625c22bf6c0cc969ae474e125504fd3.scn"]
+source_file="res://meshes/Stairs-Up-Collider.glb"
+dest_files=["res://.godot/imported/Stairs-Up-Collider.glb-fc505e6548da29805ce01f51c0e7e684.scn"]
 
 [params]
 
@@ -34,7 +34,7 @@ animation/import_rest_as_RESET=false
 import_script/path=""
 _subresources={
 "nodes": {
-"PATH:Hall_AfterStairs": {
+"PATH:Stairs_Up_Collider": {
 "generate/physics": true
 }
 }

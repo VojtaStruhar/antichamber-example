@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bt17sdicbdjbk"
-path="res://.godot/imported/antichamber-hall-beforestairs.glb-b356d39509e7afd6438fca8cd25e3bee.scn"
+uid="uid://ceuuyoqvluh55"
+path="res://.godot/imported/Stairs-Down.glb-a38e97a6fae66af7247e57be686fe364.scn"
 
 [deps]
 
-source_file="res://meshes/antichamber-hall-beforestairs.glb"
-dest_files=["res://.godot/imported/antichamber-hall-beforestairs.glb-b356d39509e7afd6438fca8cd25e3bee.scn"]
+source_file="res://meshes/Stairs-Down.glb"
+dest_files=["res://.godot/imported/Stairs-Down.glb-a38e97a6fae66af7247e57be686fe364.scn"]
 
 [params]
 
@@ -34,7 +34,7 @@ animation/import_rest_as_RESET=false
 import_script/path=""
 _subresources={
 "nodes": {
-"PATH:Hall_BeforeStairs": {
+"PATH:Stairs_Down": {
 "generate/physics": true
 }
 }
