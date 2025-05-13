@@ -1,7 +1,7 @@
 [gd_scene load_steps=21 format=4 uid="uid://by4fsuj02uyb3"]
 
-[ext_resource type="Script" uid="uid://7uicahbwx5vb" path="res://antichamber.gd" id="1_2o6r5"]
-[ext_resource type="Script" uid="uid://bdclx4q3c332j" path="res://player.gd" id="1_f3sb7"]
+[ext_resource type="Script" uid="uid://7uicahbwx5vb" path="res://scripts/antichamber.gd" id="1_2o6r5"]
+[ext_resource type="Script" uid="uid://bdclx4q3c332j" path="res://scripts/player.gd" id="1_f3sb7"]
 [ext_resource type="PackedScene" uid="uid://loidsa645j6i" path="res://meshes/Hall-BeforeStairs.glb" id="2_fj7yv"]
 [ext_resource type="PackedScene" uid="uid://mpqe1akw3sgh" path="res://meshes/Hall-BeforeStairs-Outline.glb" id="3_ioo17"]
 [ext_resource type="PackedScene" uid="uid://cjxdjqx2jg68m" path="res://meshes/adjusted/stairs_red.tscn" id="6_pkg7o"]
@@ -95,12 +95,22 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.1, 1, -0.1)
 [node name="Light_Red" type="OmniLight3D" parent="StairsRed"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0843084, 0.0581009, -1.03272)
 light_color = Color(0, 1, 1, 1)
-light_energy = 1.564
+light_energy = 0.999
 light_negative = true
 light_bake_mode = 1
 shadow_enabled = true
 omni_range = 2.13
 omni_attenuation = -3.149
+
+[node name="Light_Magenta" type="OmniLight3D" parent="StairsRed"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0843084, 0.0581009, -1.03272)
+light_color = Color(0, 0.596078, 0, 1)
+light_energy = 7.838
+light_negative = true
+light_bake_mode = 1
+shadow_enabled = true
+omni_range = 2.13
+omni_attenuation = -0.639
 
 [node name="Light_Red2" type="OmniLight3D" parent="StairsRed"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.38121, -2.2419, -0.832723)
@@ -118,6 +128,16 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.1, 1, 2)
 [node name="Light_Blue3" type="OmniLight3D" parent="Stairs_Blue"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0843081, 0.0581009, -1.03272)
 light_color = Color(1, 1, 0, 1)
+light_energy = 0.937
+light_negative = true
+light_bake_mode = 1
+shadow_enabled = true
+omni_range = 2.13
+omni_attenuation = -3.149
+
+[node name="Light_Cyan" type="OmniLight3D" parent="Stairs_Blue"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0843081, 0.0581009, -1.03272)
+light_color = Color(1, 0.415686, 0, 1)
 light_energy = 1.564
 light_negative = true
 light_bake_mode = 1
