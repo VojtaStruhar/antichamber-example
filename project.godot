@@ -8,9 +8,14 @@
 
 config_version=5
 
+[addons]
+
+portals/gizmo_forward_color=Color(0.464396, 2.33434e-06, 0.285212, 1)
+
 [application]
 
 config/name="AntichamberStairs"
+run/main_scene="uid://by4fsuj02uyb3"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
 
