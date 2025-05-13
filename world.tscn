@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://by4fsuj02uyb3"]
+[gd_scene load_steps=15 format=3 uid="uid://by4fsuj02uyb3"]
 
 [ext_resource type="Script" uid="uid://bdclx4q3c332j" path="res://player.gd" id="1_f3sb7"]
 [ext_resource type="PackedScene" uid="uid://loidsa645j6i" path="res://meshes/Hall-BeforeStairs.glb" id="2_fj7yv"]
@@ -6,7 +6,9 @@
 [ext_resource type="PackedScene" uid="uid://cjxdjqx2jg68m" path="res://meshes/adjusted/stairs_red.tscn" id="6_pkg7o"]
 [ext_resource type="PackedScene" uid="uid://d4mwke054j2jp" path="res://meshes/adjusted/stairs_blue.tscn" id="7_gbfbk"]
 [ext_resource type="PackedScene" uid="uid://c88dwy3xkhxmj" path="res://meshes/Hall-AfterStairs.glb" id="8_70uel"]
+[ext_resource type="PackedScene" uid="uid://dg8u30dpogytq" path="res://meshes/Hall-Win.glb" id="8_ioo17"]
 [ext_resource type="PackedScene" uid="uid://bwox38sbk15lq" path="res://meshes/Hall-AfterStairs-Outline.glb" id="9_hiqwa"]
+[ext_resource type="PackedScene" uid="uid://bxbrle74hc0x7" path="res://meshes/Hall-Win-Outline.glb" id="9_wse8f"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_f3sb7"]
 sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
@@ -37,7 +39,7 @@ compositor_effects = Array[CompositorEffect]([null])
 environment = SubResource("Environment_tlwt5")
 
 [node name="Player" type="CharacterBody3D" parent="." node_paths=PackedStringArray("camera")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.72657, 1.05097, 0.257735)
+transform = Transform3D(-5.96046e-08, 0, -1, 0, 1, 0, 1, 0, -5.96046e-08, -6.02657, 1.05097, 0.057735)
 floor_max_angle = 0.872665
 script = ExtResource("1_f3sb7")
 camera = NodePath("Camera3D")
@@ -66,31 +68,31 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.4, -2.2, -1)
 [node name="StairsRed" parent="." instance=ExtResource("6_pkg7o")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.1, 1, -0.1)
 
+[node name="Light_Red" type="OmniLight3D" parent="StairsRed"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0843084, 0.0581009, -1.03272)
+light_color = Color(0, 1, 1, 1)
+light_energy = 1.564
+light_negative = true
+light_bake_mode = 1
+shadow_enabled = true
+omni_range = 2.13
+omni_attenuation = -3.149
+
+[node name="Light_Red2" type="OmniLight3D" parent="StairsRed"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.38121, -2.2419, -0.832723)
+light_color = Color(0, 1, 1, 1)
+light_energy = 1.564
+light_negative = true
+light_bake_mode = 1
+shadow_enabled = true
+omni_range = 2.13
+omni_attenuation = -3.149
+
 [node name="Stairs_Blue" parent="." instance=ExtResource("7_gbfbk")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.1, 1, 2)
 
-[node name="Light_Red" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.18431, 1.0581, -1.13272)
-light_color = Color(0, 1, 1, 1)
-light_energy = 1.564
-light_negative = true
-light_bake_mode = 1
-shadow_enabled = true
-omni_range = 2.13
-omni_attenuation = -3.149
-
-[node name="Light_Red2" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.48121, -1.2419, -0.932723)
-light_color = Color(0, 1, 1, 1)
-light_energy = 1.564
-light_negative = true
-light_bake_mode = 1
-shadow_enabled = true
-omni_range = 2.13
-omni_attenuation = -3.149
-
-[node name="Light_Blue3" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.18431, 1.0581, 0.967277)
+[node name="Light_Blue3" type="OmniLight3D" parent="Stairs_Blue"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0843081, 0.0581009, -1.03272)
 light_color = Color(1, 1, 0, 1)
 light_energy = 1.564
 light_negative = true
@@ -99,8 +101,8 @@ shadow_enabled = true
 omni_range = 2.13
 omni_attenuation = -3.149
 
-[node name="Light_Blue4" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.48121, 3.1581, 1.16728)
+[node name="Light_Blue4" type="OmniLight3D" parent="Stairs_Blue"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.38121, 2.1581, -0.832723)
 light_color = Color(1, 1, 0, 1)
 light_energy = 1.564
 light_negative = true
@@ -108,3 +110,16 @@ light_bake_mode = 1
 shadow_enabled = true
 omni_range = 2.13
 omni_attenuation = -3.149
+
+[node name="Hall-Win" parent="." instance=ExtResource("8_ioo17")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, 8)
+
+[node name="Hall-Win-Outline" parent="Hall-Win" instance=ExtResource("9_wse8f")]
+
+[node name="OmniLight3D" type="OmniLight3D" parent="Hall-Win"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.20035, 0.994639, 2.35798)
+light_color = Color(1, 0, 1, 1)
+light_energy = 1.806
+light_negative = true
+omni_range = 4.318
+omni_attenuation = -1.25
