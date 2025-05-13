@@ -310,7 +310,8 @@ var _watchlist_teleportables: Dictionary[int, TeleportableMeta] = {}
 
 #region Editor Configuration Stuff
 
-const _PORTAL_SHADER = preload("uid://bhdb2skdxehes")
+const _PORTAL_SHADER: Shader = preload("uid://bhdb2skdxehes")
+const _EDITOR_PREVIEW_PORTAL_MATERIAL: StandardMaterial3D = preload("uid://dcfkcyddxkglf")
 
 # _ready(), but only in editor.
 func _editor_ready() -> void:
@@ -568,6 +569,9 @@ func _setup_mesh() -> void:
 	p.size = Vector3(portal_size.x, portal_size.y, 1)
 	mi.mesh = p
 	mi.scale.z = _portal_thickness
+	
+	# Editor-only material. Will be replaced when game starts.
+	mi.material_override = _EDITOR_PREVIEW_PORTAL_MATERIAL
 	
 	add_child_in_editor(self, mi)
 	_portal_mesh_path = get_path_to(mi)
