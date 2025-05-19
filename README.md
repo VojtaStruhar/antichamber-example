@@ -1,9 +1,6 @@
-# Portal demo
+# Portal Demo - Many Paths To Nowhere
 
-To showcase my Godot portal plugin, I've recreated the famous staircase
-puzzle from the Antichamber game.
+To showcase the workflow of [my portal plugin](https://github.com/VojtaStruhar/godot-portals-plugin), I re-created one of the first puzzles in Antichamber.
 
-> Mom, can I play Antichamber?
-> We have Antichamber at home.
-
+![Staircases](./icon.png)
 
