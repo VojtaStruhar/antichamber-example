@@ -1,0 +1,58 @@
+[gd_scene load_steps=6 format=4 uid="uid://dl3qjl3fwwvlm"]
+
+[ext_resource type="Script" uid="uid://cw1r4c1d7beyv" path="res://addons/portals/scripts/portal_3d.gd" id="1_1cbrx"]
+[ext_resource type="Material" uid="uid://dcfkcyddxkglf" path="res://addons/portals/materials/editor-preview-portal-material.tres" id="2_rfxbf"]
+[ext_resource type="Script" uid="uid://bxcel82b180o3" path="res://addons/portals/scripts/portal_boxmesh.gd" id="3_xuvre"]
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_o6p8a"]
+_surfaces = [{
+"aabb": AABB(-1, -1, -1, 2, 2, 1),
+"attribute_data": PackedByteArray("AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AACAPwAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAIA/AACAPw=="),
+"format": 34359742487,
+"index_count": 36,
+"index_data": PackedByteArray("AAABAAQABAABAAUAAQADAAUABQADAAcAAwACAAcABwACAAYAAgAAAAYABgAAAAQABAAFAAYABgAFAAcAAAABAAIAAgABAAMA"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 8,
+"vertex_data": PackedByteArray("AACAvwAAgD8AAAAAAACAPwAAgD8AAAAAAACAvwAAgL8AAAAAAACAPwAAgL8AAAAAAACAvwAAgD8AAIC/AACAPwAAgD8AAIC/AACAvwAAgL8AAIC/AACAPwAAgL8AAIC//3//f/9/AID/f/9//38AgP9//3//fwCA/3//f/9/AID/f/9//38AgP9//3//fwCA/3//f/9/AID/f/9//38AgA==")
+}]
+script = ExtResource("3_xuvre")
+size = Vector3(2, 2, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_godo4"]
+size = Vector3(2, 2, 1)
+
+[node name="PortalPrefab" type="Node3D" groups=["portals"]]
+process_priority = 100
+process_physics_priority = 100
+script = ExtResource("1_1cbrx")
+_portal_mesh_path = NodePath("Portal3D_Mesh")
+_teleport_area_path = NodePath("TeleportArea")
+_teleport_collider_path = NodePath("TeleportArea/Collider")
+portal_size = Vector2(2, 2)
+portal_render_layer = 524288
+portal_frame_width = 0.0
+viewport_size_mode = 1
+_viewport_size_max_width_absolute = 1920
+view_direction = 1
+is_teleport = true
+teleport_direction = 0
+rigidbody_boost = 0.0
+teleport_collision_mask = 32768
+teleport_tolerance = 0.5
+teleport_interactions = 0
+start_deactivated = false
+metadata/_custom_type_script = "uid://cw1r4c1d7beyv"
+metadata/_edit_group_ = true
+
+[node name="Portal3D_Mesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.05, 0, 0, 0)
+layers = 524288
+material_override = ExtResource("2_rfxbf")
+cast_shadow = 0
+mesh = SubResource("ArrayMesh_o6p8a")
+
+[node name="TeleportArea" type="Area3D" parent="."]
+
+[node name="Collider" type="CollisionShape3D" parent="TeleportArea"]
+shape = SubResource("BoxShape3D_godo4")

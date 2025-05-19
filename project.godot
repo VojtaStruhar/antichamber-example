@@ -14,11 +14,13 @@ portals/gizmo_forward_color=Color(0.464396, 2.33434e-06, 0.285212, 1)
 
 [application]
 
-config/name="AntichamberStairs"
+config/name="Many Paths To Nowhere"
+config/description="This is a recreation of an Antichamber puzzle called Many Paths To Nowhere. It serves as a showcase of my portal plugin."
+config/version="1.0.0"
 config/tags=PackedStringArray("demo", "dp", "game")
 run/main_scene="uid://by4fsuj02uyb3"
 config/features=PackedStringArray("4.4", "Forward Plus")
-config/icon="res://icon.svg"
+config/icon="uid://dys7bqm5frcfe"
 
 [display]
 
