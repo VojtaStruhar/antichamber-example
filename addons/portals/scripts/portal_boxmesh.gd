@@ -2,6 +2,15 @@
 extends ArrayMesh
 class_name PortalBoxMesh
 
+## Inverted box with a flipped front side
+##
+## This mesh class generates a mesh similar to [BoxMesh]. However, its sides are all facing 
+## [i]inwards[/i], except for the fron side, which is facing outwards. The origin point of this 
+## mesh is in the middle of its front face, instead of in the center of its volume (like you'd 
+## expect with a box).[br]
+## It is a special mesh built for portal surfaces. The front face provides a nice flat surface and 
+## the other sides try to reduce clipping issues when traveling through portals. See [Portal3D]
+
 @export var size: Vector3 = Vector3(1, 1, 1):
 	set(v):
 		size = v

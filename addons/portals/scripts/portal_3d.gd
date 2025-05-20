@@ -4,8 +4,22 @@ class_name Portal3D extends Node3D
 
 ## Seamless 3D portal
 ##
-## This node is a tool script that provides configuration options for portal setup. The portal
-## can be visual-only or also teleporting.
+## To get started, create two Portal3D instances and set their [member exit_portal] to each other.
+## This creates a linked portal pair that you can look through. Make your player to collide with
+## [member teleport_collision_mask] and you will be able to walk back and forth through the portal.
+## [br][br]
+## To integrate portals into your game, you can make use of the [signal on_teleport] and 
+## [signal on_teleport_receive] signals. You can link a portal a different one by chaning its 
+## [member exit_portal] during gameplay. The next level is to make use of the portal's callbacks,
+## mainly the [member ON_TELEPORT_CALLBACK]. If you need to raycast through a portal, then the 
+## [method forward_raycast] method might come in handy! When it comes to optimization, you can use
+## the [method activate] and [method deactivate] methods to control which portals are consuming 
+## resources.
+## [br][br]
+## [b]TIP:[/b] If you change the default value of some property, it will not get synchronized into existing 
+## portal instances due to how Godot handles custom inspectors. For easier defaults management, 
+## I recommend creating a scene with Portal3D as a root and re-using that.
+
 
 #region Public API
 
@@ -16,38 +30,39 @@ signal on_teleport(node: Node3D)
 ## its [member exit_portal] triggered a teleport!
 signal on_teleport_receive(node: Node3D)
 
-## The portal starts rendering again, [member portal_mesh] becomes visible and teleport
-## activates (if the portal is teleporting).[br][br]
-## Also see [method deactivate]
+## Activates the portal, making it visible and teleporting again. THe assumption is that it was 
+## previously deactivated by [method deactivate] or [member start_deactivated]. Recreates internal
+## viewports if needed.
 func activate() -> void:
 	process_mode = Node.PROCESS_MODE_INHERIT
 	
-	# Viewports have been destroyed
 	if portal_viewport == null:
+		# Viewports have been destroyed
 		_setup_cameras()
 	
 	show()
 	
 
-## Disables processing and hides the portal. Optionally destroys the viewports, freeing memory.
-## Set [member start_deactivated] to [code]true[/code] to avoid viewport allocation at the start of 
+## Disables all processing (this includes teleportation) and hides the portal. Optionally destroys
+## the viewports, freeing up memory. [br][br]
+## Setting [member start_deactivated] to [code]true[/code] avoid viewport allocation at the start of 
 ## the game. [br][br]
-## Also see [method activate]
+## Deactivated portal has to be explicitly activated by calling [method activate].
 func deactivate(destroy_viewports: bool = false) -> void:
 	hide()
 	_watchlist_teleportables.clear()
 	
 	if destroy_viewports:
 		if portal_viewport:
-			print("[%s] freeing viewport" % name)
 			portal_viewport.queue_free()
 			portal_viewport = null
 			portal_camera = null
 	
 	process_mode = Node.PROCESS_MODE_DISABLED
 
-## If your [RayCast3D] node hits a portal that it was meant to go through, pass it to this function
-## and it will get you the next collider behind the portal.
+## Helper method for checking for raycast collisions through portals. If your [RayCast3D] node hits
+## a portal collider, pass the [RayCast3D] node to this function to find out what's on the other
+## side of the portal! [br][br]
 ## Uses [method PhysicsDirectSpaceState3D.intersect_ray] under the hood.[br][br]
 ## Also see [method forward_raycast_query].
 func forward_raycast(raycast: RayCast3D) -> Dictionary:
@@ -68,9 +83,10 @@ func forward_raycast(raycast: RayCast3D) -> Dictionary:
 	return get_world_3d().direct_space_state.intersect_ray(query)
 
 ## When doing raycasts with [method PhysicsDirectSpaceState3D.intersect_ray] and you hit a portal
-## that you want to go through, pass the existing [PhysicsRayQueryParameters3D] to this function.
-## It will take over the parameters and calculate the ray's continuation. [br][br]
-## See [method forward_raycast] for usage with [RayCast3D].
+## that you want to go through, pass the [PhysicsRayQueryParameters3D] you are using to this 
+## function. It will calculate the ray's continuation and execute the raycast again, returning the 
+## result dictionary. [br][br]
+## If you are using [RayCast3D] for raycasting, see [method forward_raycast].
 func forward_raycast_query(params: PhysicsRayQueryParameters3D) -> Dictionary:
 	var start := to_exit_position(params.from)
 	var end := to_exit_position(params.to)
@@ -89,24 +105,65 @@ func forward_raycast_query(params: PhysicsRayQueryParameters3D) -> Dictionary:
 
 	return get_world_3d().direct_space_state.intersect_ray(query)
 
+
+## This method will be called on a teleported node if [member TeleportInteractions.CALLBACK]
+## is checked in [member teleport_interactions]. The portal will try to call the method 
+## [code]on_teleport[/code] on any object being teleported by it.[br][br]
+## Example:
+## [codeblock]
+## func on_teleport(portal: Portal3D) -> void:
+##     print("Teleported by %s!" % portal.name)
+## [/codeblock]
+const ON_TELEPORT_CALLBACK: StringName = &"on_teleport"
+
+## This method will be called on a node that will get into close proximity of a portal that has 
+## [member TeleportInteractions.DUPLICATE_MESHES] turned on. The method is expected to return an
+## array of [MeshInstance3D]s.[br][br]
+## Example:
+## [codeblock]
+## @onready var character_mesh: MeshInstance = $CharacterMesh
+## 
+## func get_teleportable_meshes() -> Array[MeshInstance3D]:
+##     return [character_mesh]
+## [/codeblock]
+##
+## The returned meshes require a special material. Check out the plugin's README for more 
+## information!
+const DUPLICATE_MESHES_CALLBACK: StringName = &"get_teleportable_meshes"
+
+## By default, object triggering the teleport gets teleported. You can override this with a 
+## metadata property that contains a [NodePath]. If the metadata property is set, then the node at 
+## the node path will be teleported instead. Setting this to ancestor nodes is recommended.[br][br]
+## Example:
+## [codeblock]
+## func _ready() -> void:
+##     self.set_meta("teleport_root", ^"..") # parent
+## [/codeblock]
+## Or you can set the metadata property via the inspector!
+const TELEPORT_ROOT_META: StringName = &"teleport_root"
+	
+
 #endregion
 
-## Size of the portal rectangle. [br][br]
-## Detph of the portal is an implementation detail and is set automatically.
+## Size of the portal rectangle, height and width.
 var portal_size: Vector2 = Vector2(2.0, 2.5):
 	set(v):
 		portal_size = v
-		if caused_by_user_interaction():
+		if _caused_by_user_interaction():
 			_on_portal_size_changed()
 			update_configuration_warnings()
 			if exit_portal:
 				exit_portal.update_configuration_warnings()
 
 ## The exit of this particular portal. Portal camera renders what it sees through this
-## [member exit_portal]. Teleports take you here. 
+## [member exit_portal] and teleports take you here. This is a [b]required[/b] property, it
+## can never be [code]null[/code].
 ## [br][br]
-## Two portals commonly have each other set as their exit portals, which allows you to 
-## travel back and forth. But this does not have to be the case!
+## You can change this property during gameplay to switch the portal to a different destination.
+## To disable a portal, see [method deactivate].
+## [br][br]
+## [b]TIP:[/b] Commonly, two portals have set each other as [member exit_portal], which
+## allows you to travel back and forth. But you can experiment with one-way portals too!
 var exit_portal: Portal3D:
 	set(v):
 		exit_portal = v
@@ -116,37 +173,28 @@ var exit_portal: Portal3D:
 var _tb_pair_portals: Callable = _editor_pair_portals.bind()
 var _tb_sync_portal_sizes: Callable = _editor_sync_portal_sizes.bind()
 
-## Manually specify the main camera. By default it's inferred as the camera rendering the
-## parent viewport of the portal. You might have to specify this, if your game uses multiple
-## [SubViewport]s.
+## Manually override what's the main camera of the scene. By default it's inferred as the camera
+## rendering the parent viewport of the portal. You might have to specify this, if your game uses 
+## multiple [SubViewport]s.
 var player_camera: Camera3D
 
-## [member VisualInstance3D.layers] settging for [member portal_mesh]. So that the portal cameras
-## don't see other portals.[br][br]
-## You can set the default in [i]Project settings > Addons > Portals[/i].
-var portal_render_layer: int = 1 << 19:
-	set(v):
-		portal_render_layer = v
-		if caused_by_user_interaction():
-			portal_mesh.layers = v
-
-
-## The portal camera sets its [member Camera3D.near] as close to the portal as possible, to 
-## hopefully cull objects close behind the portal. This value offsets the [member portal_camera]'s 
+## The portal camera sets its [member Camera3D.near] as close to the portal as possible, in an 
+## effort to clip objects close behind the portal. This value offsets the [member portal_camera]'s 
 ## near clip plane. Might be useful, if the portal has a thick frame around it.
 var portal_frame_width: float = 0
 
-## Determines how big the internal portal viewports are. It helps to reduce the memory usage
+## Options for different sizes of the internal viewports. It helps to reduce the memory usage
 ## by not rendering the portals at full resolution. Viewports are resized on window resize.
 enum PortalViewportSizeMode {
 	## Render at full window resolution.
 	FULL,
-	## Portal viewport max width. Height is calculated from window aspect ratio.
+	## The portal will be [b]at most[/b] this wide. Height is calculated from window aspect ratio.
 	MAX_WIDTH_ABSOLUTE,
 	## Portal viewport will be a fraction of full window size.
 	FRACTIONAL
 }
-## Size mode to use for the portal viewport size.
+
+## Size mode to use for the portal viewport size. Only set this via the inspector.
 var viewport_size_mode: PortalViewportSizeMode = PortalViewportSizeMode.FULL:
 	set(v):
 		viewport_size_mode = v
@@ -155,9 +203,11 @@ var _viewport_size_max_width_absolute: int = ProjectSettings.get_setting("displa
 var _viewport_size_fractional: float = 0.5
 
 
-## Hints the direction from which you expect the portal to be viewed. Makes sense to restrict on
-## one-way portals or visual-only portals (with [member is_teleport] set to [code]false[/code]).
+## Hints the direction from which you expect the portal to be viewed.[br][br] 
+## Use cases: one-way portals, visual-only portals (with [member is_teleport] set to 
+## [code]false[/code]), or portals that are flush with a wall.
 enum ViewDirection {
+	## Portal is expected to be viewed from either side (default)
 	FRONT_AND_BACK,
 	## Corresponds to portal's FORWARD direction (-Z)
 	ONLY_FRONT,
@@ -172,14 +222,24 @@ enum ViewDirection {
 ## Also see [member teleport_direction]
 var view_direction: ViewDirection = ViewDirection.FRONT_AND_BACK
 
-## If [code]true[/code], the portal is also a teleport.
+
+## The [member portal_mesh] setting for [member VisualInstance3D.layers], so that the portal 
+## cameras don't see other portals.
+var portal_render_layer: int = 1 << 19:
+	set(v):
+		portal_render_layer = v
+		if _caused_by_user_interaction():
+			portal_mesh.layers = v
+
+## If [code]true[/code], the portal is also a teleport. If [code]false[/code], the portal is 
+## visual-only.
 ## [br][br]
 ## You are expected to toggle this in the editor. For runtime teleport toggling, see 
 ## [method activate] and [method deactivate].
 var is_teleport: bool = true:
 	set(v):
 		is_teleport = v
-		if caused_by_user_interaction():
+		if _caused_by_user_interaction():
 			_setup_teleport()
 			notify_property_list_changed()
 
@@ -189,21 +249,17 @@ enum TeleportDirection {
 	FRONT,
 	## Corresponds to portal's BACK direction (+Z)
 	BACK,
-	## Teleports stuff coming from either side.
+	## Teleports stuff coming from either side. (default)
 	FRONT_AND_BACK
 }
 
-## If the portal is also a teleport, it will only teleport things coming from
-## this direction.
+## Portal will only teleport things coming from this direction.
 var teleport_direction: TeleportDirection = TeleportDirection.FRONT_AND_BACK
 
 ## When a [RigidBody3D] goes through the portal, give its new normalized velocity a 
 ## little boost. Makes stuff flying out of portals more fun. [br][br]
 ## Recommended values: 1 to 3
 var rigidbody_boost: float = 0.0
-
-## [CollisionObject3D]s detected by this mask will be registered by the portal and teleported. 
-var teleport_collision_mask: int = 1 << 15
 
 ## When teleporting, the portal checks if the teleported object is less than [b]this[/b] near.
 ## Prevents false negatives when multiple portals are on top of each other.
@@ -219,32 +275,22 @@ enum TeleportInteractions {
 	PLAYER_UPRIGHT = 1 << 1,
 	## Duplicate meshes present on the teleported object, resulting in a [i]smooth teleport[/i] 
 	## from a 3rd point of view. [br]
-	## This option is quite involved, requires a method named [constant DUPLICATE_MESHES_CALLBACK] 
-	## implemented on the teleported body, which returns an array of mesh instances that should be 
-	## duplicated. Every one of those meshes also needs to implement a special shader to clip it 
-	## along the portal plane.
+	## To use this feature, implement a method named [constant DUPLICATE_MESHES_CALLBACK] on the 
+	## teleported body, which returns an array of mesh instances that should be duplicated. 
+	## Every one of those meshes also needs to implement a special shader material to clip it along 
+	## the portal plane. 
+	## See shaderinclude at [code]addons/portals/materials/portalclip_mesh.gdshaderinc[/code]
 	DUPLICATE_MESHES = 1 << 2
 }
-
-## This method will be called on a teleported node if [member TeleportInteractions.CALLBACK]
-## is checked in [member teleport_interactions]
-const ON_TELEPORT_CALLBACK: StringName = &"on_teleport"
-
-## This method will be called on a node that will get into close proximity of a portal that has 
-## [member TeleportInteractions.DUPLICATE_MESHES] turned on. The method is expected to return an
-## array of [MeshInstance3D]s.
-const DUPLICATE_MESHES_CALLBACK: StringName = &"get_teleportable_meshes"
-
-## When a [CollisionObject3D] should be teleported, the portal check for a [NodePath] for an 
-## alternative node to teleport. For example it's useful when the [Area3D] that's triggering the 
-## teleport isn't the root of a player or object.
-const TELEPORT_ROOT_META: StringName = &"teleport_root"
-
 
 ## See [enum TeleportInteractions] for options.
 var teleport_interactions: int = TeleportInteractions.CALLBACK \
 									| TeleportInteractions.PLAYER_UPRIGHT
 
+
+## Any [CollisionObject3D]s detected by this mask will be registered by the portal and teleported, 
+## when they cross the portal boundary.
+var teleport_collision_mask: int = 1 << 15
 
 ## If the portal is not immediately visible on scene start, you can start it in [i]disabled 
 ## mode[/i]. This just means it will not create the appropriate subviewports, saving memory. 
@@ -257,7 +303,7 @@ var start_deactivated: bool = false
 @export_storage var _portal_thickness: float = 0.05:
 	set(v):
 		_portal_thickness = v
-		if caused_by_user_interaction(): _on_portal_size_changed()
+		if _caused_by_user_interaction(): _on_portal_size_changed()
 
 @export_storage var _portal_mesh_path: NodePath
 ## Mesh used to visualize the portal surface. Created when the portal is added to the scene 
@@ -284,14 +330,17 @@ var teleport_collider: CollisionShape3D:
 
 
 ## Camera that looks through the exit portal and renders to [member portal_viewport]. 
-## Created in [code]_ready[/code]
+## Created in [method Node._ready]
 var portal_camera: Camera3D = null
 
 ## Viewport that supplies the albedo texture to portal mesh. Rendered by [member portal_camera].
-## Created in [code]_ready[/code]
+## Created in [method Node._ready]
 var portal_viewport: SubViewport = null
 
-## Metadata kept about the teleportable objects watched by the portal.
+## Metadata about teleported objects. 
+## 
+## When the portal detects a teleportable body (or area) nearby, it gathers this metadata and 
+## starts watching it every frame for teleportation. 
 class TeleportableMeta:
 	## Forward distance from the portal
 	var forward: float = 0
@@ -301,14 +350,14 @@ class TeleportableMeta:
 	## Cloned [member Portal3D.TeleportableMeta.meshes] with [method Node.duplicate]
 	var mesh_clones: Array[MeshInstance3D] = []
 
-# These physics bodies are being watched by the portal. They are registered under their instance ID
-# as the keys of the dictionary. Registering them by their object references was unreliable when 
-# freeing object for some reason.
+# These physics bodies are being watched by the portal. They are registered with their instance IDs
+# as the keys of the dictionary. Registering them by their object references becomes unreliable 
+# when the teleport candidate gets freed.
 var _watchlist_teleportables: Dictionary[int, TeleportableMeta] = {}
 
 #endregion
 
-#region Editor Configuration Stuff
+#region Editor Configuration
 
 const _PORTAL_SHADER: Shader = preload("uid://bhdb2skdxehes")
 const _EDITOR_PREVIEW_PORTAL_MATERIAL: StandardMaterial3D = preload("uid://dcfkcyddxkglf")
@@ -324,7 +373,7 @@ func _editor_ready() -> void:
 	_setup_mesh()
 	_setup_teleport()
 	
-	self.group_node(self)
+	self._group_node(self)
 
 func _notification(what: int) -> void:
 	match what:
@@ -358,7 +407,7 @@ func _setup_teleport():
 	var area = Area3D.new()
 	area.name = "TeleportArea"
 	
-	add_child_in_editor(self, area)
+	_add_child_in_editor(self, area)
 	_teleport_area_path = get_path_to(area)
 	
 	var collider = CollisionShape3D.new()
@@ -368,7 +417,7 @@ func _setup_teleport():
 	box.size.y = portal_size.y
 	collider.shape = box
 	
-	add_child_in_editor(teleport_area, collider)
+	_add_child_in_editor(teleport_area, collider)
 	_teleport_collider_path = get_path_to(collider)
 
 
@@ -388,7 +437,7 @@ func _on_portal_size_changed() -> void:
 	
 #endregion
 
-#region GAMEPLAY RUNTIME STUFF
+#region GAMEPLAY LOGIC
 
 func _ready() -> void:
 	if Engine.is_editor_hint():
@@ -430,7 +479,6 @@ func _process(delta: float) -> void:
 	
 
 func _process_cameras() -> void:
-	
 	if portal_camera == null:
 		push_error("%s: No portal camera" % name)
 		return
@@ -511,11 +559,11 @@ func _process_teleports() -> void:
 				exit_portal._process_cameras()
 			
 			# Resolve teleport interactions
-			if was_player and check_tp_interaction(TeleportInteractions.PLAYER_UPRIGHT):
+			if was_player and _check_tp_interaction(TeleportInteractions.PLAYER_UPRIGHT):
 				get_tree().create_tween().tween_property(teleportable, "rotation:x", 0, 0.3)
 				get_tree().create_tween().tween_property(teleportable, "rotation:z", 0, 0.3)
 			
-			if check_tp_interaction(TeleportInteractions.CALLBACK):
+			if _check_tp_interaction(TeleportInteractions.CALLBACK):
 				if teleportable.has_method(ON_TELEPORT_CALLBACK):
 					teleportable.call(ON_TELEPORT_CALLBACK, self)
 			
@@ -573,7 +621,7 @@ func _setup_mesh() -> void:
 	# Editor-only material. Will be replaced when game starts.
 	mi.material_override = _EDITOR_PREVIEW_PORTAL_MATERIAL
 	
-	add_child_in_editor(self, mi)
+	_add_child_in_editor(self, mi)
 	_portal_mesh_path = get_path_to(mi)
 
 func _setup_cameras() -> void:
@@ -584,7 +632,7 @@ func _setup_cameras() -> void:
 	if exit_portal != null:
 		portal_viewport = SubViewport.new()
 		portal_viewport.name = self.name + "_SubViewport"
-		portal_viewport.size = get_desired_viewport_size()
+		portal_viewport.size = _calculate_viewport_size()
 		self.add_child(portal_viewport, true)
 		
 		# Disable tonemapping on portal cameras
@@ -595,7 +643,7 @@ func _setup_cameras() -> void:
 		adjusted_env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 		adjusted_env.tonemap_exposure = 1
 		
-		portal_camera = player_camera.duplicate(0)
+		portal_camera = Camera3D.new()
 		portal_camera.name = self.name + "_Camera3D"
 		portal_camera.environment = adjusted_env
 		
@@ -636,7 +684,7 @@ func _on_teleport_body_exited(body: Node3D) -> void:
 
 func _on_window_resize() -> void:
 	if portal_viewport:
-		portal_viewport.size = get_desired_viewport_size()
+		portal_viewport.size = _calculate_viewport_size()
 
 #endregion
 
@@ -646,7 +694,7 @@ func _construct_tp_metadata(node: Node3D) -> void:
 	var meta = TeleportableMeta.new()
 	meta.forward = forward_distance(node)
 	
-	if check_tp_interaction(TeleportInteractions.DUPLICATE_MESHES) and \
+	if _check_tp_interaction(TeleportInteractions.DUPLICATE_MESHES) and \
 		node.has_method(DUPLICATE_MESHES_CALLBACK):
 		meta.meshes = node.call(DUPLICATE_MESHES_CALLBACK)
 		for m: MeshInstance3D in meta.meshes:
@@ -655,7 +703,7 @@ func _construct_tp_metadata(node: Node3D) -> void:
 			meta.mesh_clones.append(dupe)
 			self.add_child(dupe, true)
 		
-		enable_mesh_clipping(meta, self)
+		_enable_mesh_clipping(meta, self)
 	
 	_watchlist_teleportables.set(node.get_instance_id(), meta)
 
@@ -663,12 +711,12 @@ func _erase_tp_metadata(node_id: int) -> void:
 	var meta = _watchlist_teleportables.get(node_id)
 	if meta != null:
 		meta = meta as TeleportableMeta
-		for m in meta.meshes: disable_mesh_clipping(m)
+		for m in meta.meshes: _disable_mesh_clipping(m)
 		for c in meta.mesh_clones: c.queue_free()
 		
 	_watchlist_teleportables.erase(node_id)
 
-func enable_mesh_clipping(meta: TeleportableMeta, along_portal: Portal3D) -> void:
+func _enable_mesh_clipping(meta: TeleportableMeta, along_portal: Portal3D) -> void:
 	for mi: MeshInstance3D in meta.meshes:
 		var clip_normal = signf(meta.forward) * along_portal.global_basis.z
 		mi.set_instance_shader_parameter("portal_clip_active", true)
@@ -682,7 +730,7 @@ func enable_mesh_clipping(meta: TeleportableMeta, along_portal: Portal3D) -> voi
 		clone.set_instance_shader_parameter("portal_clip_point", exit.global_position)
 		clone.set_instance_shader_parameter("portal_clip_normal", clip_normal)
 
-func disable_mesh_clipping(mi: MeshInstance3D) -> void:
+func _disable_mesh_clipping(mi: MeshInstance3D) -> void:
 	mi.set_instance_shader_parameter("portal_clip_active", false)
 
 func _transfer_tp_metadata_to_exit(for_body: Node3D) -> void:
@@ -696,7 +744,7 @@ func _transfer_tp_metadata_to_exit(for_body: Node3D) -> void:
 		return
 	
 	tp_meta.forward = exit_portal.forward_distance(for_body)
-	enable_mesh_clipping(tp_meta, exit_portal) # Switch, the main mesh is clipped by exit portal!
+	_enable_mesh_clipping(tp_meta, exit_portal) # Switch, the main mesh is clipped by exit portal!
 	
 	exit_portal._watchlist_teleportables.set(body_id, tp_meta)
 	# NOTE: Not using '_erase_tp_metadata' here, as it also frees the cloned meshes!
@@ -739,32 +787,26 @@ func forward_distance(node: Node3D) -> float:
 	var node_relative: Vector3 = (node.global_transform.origin - self.global_transform.origin)
 	return portal_front.dot(node_relative)
 
-## Helper function meant to be used in editor. Adds [param node] as a child to 
-## [param parent]. Forces a readable name and sets the child's owner to the same
-## as parent's.
-func add_child_in_editor(parent: Node, node: Node) -> void:
+# Helper function meant to be used in editor. Adds [param node] as a child to 
+# [param parent]. Forces a readable name and sets the child's owner to the same
+# as parent's.
+func _add_child_in_editor(parent: Node, node: Node) -> void:
 	parent.add_child(node, true)
 	# self.owner is null if this node is the scene root. Supply self.
 	node.owner = self if self.owner == null else self.owner
 
-## Used to conditionally run property setters.
-## [br]
-## Setters fire both on editor set and when the scene starts up (the engine is
-## assigning exported members). This should prevent the second case.
-func caused_by_user_interaction() -> bool:
+# Used to conditionally run property setters.
+# [br]
+# Setters fire both on editor set and when the scene starts up (the engine is
+# assigning exported members). This should prevent the second case.
+func _caused_by_user_interaction() -> bool:
 	return Engine.is_editor_hint() and is_node_ready()
 
-## Editor helper function. Locks node in 3D editor view.
-static func lock_node(node: Node3D) -> void:
-	node.set_meta("_edit_lock_", true)
-
-
-## Editor helper function. Groups nodes in 3D editor view.
-static func group_node(node: Node) -> void:
+# Editor helper function. Groups nodes in 3D editor view.
+func _group_node(node: Node) -> void:
 	node.set_meta("_edit_group_", true)
 
-
-func get_desired_viewport_size() -> Vector2i:
+func _calculate_viewport_size() -> Vector2i:
 	var vp_size: Vector2i = get_viewport().size
 	var aspect_ratio: float = float(vp_size.x) / float(vp_size.y)
 	
@@ -783,10 +825,10 @@ func get_desired_viewport_size() -> Vector2i:
 		ProjectSettings.get_setting("display/window/size/viewport_height")
 	)
 
-func check_tp_interaction(flag: int) -> bool:
+func _check_tp_interaction(flag: int) -> bool:
 	return (teleport_interactions & flag) > 0
 
-## Get a point where the portal plane intersects a line. Line ends [param start] and [param end] 
+## Get a point where the portal plane intersects a line. Line [param start] and [param end] 
 ## are in global coordinates and so is the result. Used for forwarding raycast queries.
 func line_intersection(start: Vector3, end: Vector3) -> Vector3:
 	var plane_normal = - global_basis.z
@@ -803,7 +845,7 @@ func line_intersection(start: Vector3, end: Vector3) -> Vector3:
 
 #endregion
 
-#region GODOT ENGINE INTEGRATIONS
+#region GODOT EDITOR INTEGRATIONS
 
 func _get_configuration_warnings() -> PackedStringArray:
 	var warnings: Array[String] = []
@@ -845,7 +887,6 @@ func _get_property_list() -> Array[Dictionary]:
 	
 	config.append(AtExport.group("Rendering"))
 	config.append(AtExport.node("player_camera", "Camera3D"))
-	config.append(AtExport.int_render_3d("portal_render_layer"))
 	config.append(AtExport.float_range("portal_frame_width", 0.0, 10.0, 0.01))
 	
 	config.append(AtExport.enum_(
@@ -858,8 +899,9 @@ func _get_property_list() -> Array[Dictionary]:
 	
 	config.append(AtExport.enum_("view_direction", &"Portal3D.ViewDirection", ViewDirection))
 	
-	config.append(AtExport.group_end())
+	config.append(AtExport.int_render_3d("portal_render_layer"))
 	
+	config.append(AtExport.group_end())
 	
 	config.append(AtExport.bool_("is_teleport"))
 	
@@ -869,10 +911,10 @@ func _get_property_list() -> Array[Dictionary]:
 		config.append(
 			AtExport.enum_("teleport_direction", &"Portal3D.TeleportDirection", TeleportDirection))
 		config.append(AtExport.float_range("rigidbody_boost", 0, 5, 0.1, ["or_greater"]))
-		config.append(AtExport.int_physics_3d("teleport_collision_mask"))
 		config.append(AtExport.float_range("teleport_tolerance", 0.0, 5.0, 0.1, ["or_greater"]))
 		var opts: Array = TeleportInteractions.keys().map(func(s): return s.capitalize())
 		config.append(AtExport.int_flags("teleport_interactions", opts))
+		config.append(AtExport.int_physics_3d("teleport_collision_mask"))
 		config.append(AtExport.group_end())
 	
 	config.append(AtExport.group("Advanced"))
@@ -884,15 +926,15 @@ func _property_can_revert(property: StringName) -> bool:
 	return property in [
 		&"portal_size",
 		&"player_camera",
-		&"portal_render_layer",
 		&"portal_frame_width",
 		&"_viewport_size_max_width_absolute",
 		&"view_direction",
+		&"portal_render_layer",
 		&"teleport_direction",
 		&"rigidbody_boost",
-		&"teleport_collision_mask",
 		&"teleport_tolerance",
 		&"teleport_interactions",
+		&"teleport_collision_mask",
 		&"start_deactivated",
 	]
 
@@ -900,24 +942,24 @@ func _property_get_revert(property: StringName) -> Variant:
 	match property:
 		&"portal_size":
 			return Vector2(2, 2.5)
-		&"portal_render_layer":
-			return 1 << 19
 		&"portal_frame_width":
 			return 0.0
 		&"_viewport_size_max_width_absolute":
 			return ProjectSettings.get_setting("display/window/size/viewport_width")
 		&"view_direction":
 			return ViewDirection.FRONT_AND_BACK
+		&"portal_render_layer":
+			return 1 << 19
 		&"teleport_direction":
 			return TeleportDirection.FRONT_AND_BACK
 		&"rigidbody_boost":
 			return 0.0
-		&"teleport_collision_mask":
-			return 1 << 15
 		&"teleport_tolerance":
 			return 0.5
 		&"teleport_interactions":
 			return TeleportInteractions.CALLBACK | TeleportInteractions.PLAYER_UPRIGHT
+		&"teleport_collision_mask":
+			return 1 << 15
 		&"start_deactivated":
 			return false
 	return null

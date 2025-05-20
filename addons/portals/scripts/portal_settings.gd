@@ -1,4 +1,4 @@
-class_name PortalSettings
+class_name PortalSettings extends Object
 
 ## Static helper class for portal project settings.
 ##
@@ -8,6 +8,7 @@ class_name PortalSettings
 static func _qual_name(setting: String) -> String:
 	return "addons/portals/" + setting
 
+## Initializes a setting, it it's not present already. The setting is [i]basic[/i] by default.
 static func init_setting(setting: String, 
 						 default_value: Variant, 
 						 requires_restart: bool = false) -> void:
@@ -31,6 +32,7 @@ static func add_info(config: Dictionary) -> void:
 	
 	ProjectSettings.add_property_info(config)
 
+## Calls [method ProjectSettings.get_setting]
 static func get_setting(setting: String) -> Variant:
 	setting = _qual_name(setting)
 	return ProjectSettings.get_setting(setting)
